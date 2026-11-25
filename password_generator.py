@@ -39,7 +39,7 @@ def generate_password(
     return "".join(chars)
 
 
-def main() -> None:
+def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="Generate a secure random password.")
     parser.add_argument("-l", "--length", type=int, default=16,
                         help="Password length (default: 16)")
@@ -49,7 +49,10 @@ def main() -> None:
     parser.add_argument("--no-symbols", action="store_true", help="Exclude symbols")
     parser.add_argument("-n", "--count", type=int, default=1,
                         help="Number of passwords to generate (default: 1)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
+    if args.count < 1:
+        parser.error("--count must be at least 1")
 
     try:
         for _ in range(args.count):

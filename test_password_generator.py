@@ -1,7 +1,9 @@
+import io
 import string
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 
-from password_generator import generate_password
+from password_generator import generate_password, main
 
 
 class GeneratePasswordTest(unittest.TestCase):
@@ -43,6 +45,26 @@ class GeneratePasswordTest(unittest.TestCase):
 
     def test_generates_different_passwords(self):
         self.assertNotEqual(generate_password(), generate_password())
+
+
+class MainTest(unittest.TestCase):
+
+    def run_main(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            main(list(argv))
+        return out.getvalue()
+
+    def test_prints_count_passwords(self):
+        lines = self.run_main("--count", "3", "--length", "12").splitlines()
+        self.assertEqual(len(lines), 3)
+        self.assertTrue(all(len(line) == 12 for line in lines))
+
+    def test_non_positive_count_is_an_error(self):
+        for count in ("0", "-2"):
+            with self.assertRaises(SystemExit) as ctx:
+                self.run_main("--count", count)
+            self.assertEqual(ctx.exception.code, 2)
 
 
 if __name__ == "__main__":
